@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	pb "grpc-calculator/calculatorpb"
+	"io"
 	"log"
 	"net"
 
@@ -39,6 +41,7 @@ func (s *server) Divide(ctx context.Context, req *pb.DivideRequest) (*pb.DivideR
 	}
 }
 
+// server streaming
 func (s *server) PrimeFactors(req *pb.PrimeRequest, stream pb.CalculatorService_PrimeFactorsServer) error {
 	n := req.Number
 	divisor := int32(2)
@@ -51,6 +54,23 @@ func (s *server) PrimeFactors(req *pb.PrimeRequest, stream pb.CalculatorService_
 		}
 	}
 	return nil
+}
+
+func (s *server) Average(stream pb.CalculatorService_AverageServer) error {
+	var sum, count int32
+	for {
+		in, err := stream.Recv()
+		fmt.Println(in)
+		if err == io.EOF {
+			avg := float64(sum) / float64(count)
+			return stream.SendAndClose(&pb.AverageResponse{Average: avg})
+		}
+		if err != nil {
+			return err
+		}
+		sum += in.Number
+		count++
+	}
 }
 
 func main() {

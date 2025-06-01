@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	pb "grpc-calculator/calculatorpb"
-	"io"
 	"log"
 	"time"
 
@@ -32,21 +31,29 @@ func main() {
 
 	// server streaming
 	time.Sleep(time.Second * 3)
-	stream, err := clinet.PrimeFactors(context.Background(), &pb.PrimeRequest{Number: 48})
-	if err != nil {
-		log.Fatal(err)
+	// stream, err := clinet.PrimeFactors(context.Background(), &pb.PrimeRequest{Number: 48})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// for {
+	// 	res, err := stream.Recv()
+	// 	if err == io.EOF {
+	// 		log.Fatal("Stream error: ", err)
+	// 		break
+	// 	}
+	// 	if err != nil {
+	// 		log.Fatalf("Stream error: %v", err) // Actual errors
+	// 	}
+	// 	time.Sleep(time.Second)
+	// 	fmt.Print(res.PrimeFactor, "  \n")
+	// }
+	// fmt.Println()
+	//client streaming
+	cStream, _ := clinet.Average(context.Background())
+	for _, val := range []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
+		time.Sleep(time.Second * 2)
+		cStream.Send(&pb.Number{Number: val})
 	}
-	for {
-		res, err := stream.Recv()
-		if err == io.EOF {
-			log.Fatal("Stream error: ", err)
-			break
-		}
-		if err != nil {
-			log.Fatalf("Stream error: %v", err) // Actual errors
-		}
-		time.Sleep(time.Second)
-		fmt.Print(res.PrimeFactor, "  \n")
-	}
-	fmt.Println()
+	avgResp, _ := cStream.CloseAndRecv()
+	fmt.Println("Average: ", avgResp.Average)
 }
