@@ -39,6 +39,20 @@ func (s *server) Divide(ctx context.Context, req *pb.DivideRequest) (*pb.DivideR
 	}
 }
 
+func (s *server) PrimeFactors(req *pb.PrimeRequest, stream pb.CalculatorService_PrimeFactorsServer) error {
+	n := req.Number
+	divisor := int32(2)
+	for n > 1 {
+		if n%divisor == 0 {
+			stream.Send(&pb.PrimeResponse{PrimeFactor: divisor})
+			n = n / divisor
+		} else {
+			divisor++
+		}
+	}
+	return nil
+}
+
 func main() {
 	lis, err := net.Listen("tcp", ":8000")
 	if err != nil {
