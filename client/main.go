@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	pb "grpc-calculator/calculatorpb"
+	"io"
 	"log"
 	"time"
 
@@ -29,6 +30,7 @@ func main() {
 	// fmt.Println("Add Result: ", addResp.Result)
 	// fmt.Println("time took: ", time.Since(now))
 
+	// ===============================================================
 	// server streaming
 	time.Sleep(time.Second * 3)
 	// stream, err := clinet.PrimeFactors(context.Background(), &pb.PrimeRequest{Number: 48})
@@ -48,12 +50,36 @@ func main() {
 	// 	fmt.Print(res.PrimeFactor, "  \n")
 	// }
 	// fmt.Println()
+
+	// ===============================================================
 	//client streaming
-	cStream, _ := clinet.Average(context.Background())
-	for _, val := range []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
+	// cStream, _ := clinet.Average(context.Background())
+	// for _, val := range []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
+	// 	time.Sleep(time.Second * 2)
+	// 	cStream.Send(&pb.Number{Number: val})
+	// }
+	// avgResp, _ := cStream.CloseAndRecv()
+	// fmt.Println("Average: ", avgResp.Average)
+
+	// ==========================================
+	// both streaming
+	bStream, _ := clinet.Max(context.Background())
+	waitc := make(chan struct{})
+	go func() {
+		for {
+			res, err := bStream.Recv()
+			if err == io.EOF {
+				break
+			}
+			fmt.Println("New max:", res.CurrentMax)
+		}
+		close(waitc)
+	}()
+	for _, val := range []int32{3, 1, 4, 1, 5, 9, 2, 6, 8, 9, 10, 12, 14, 15} {
 		time.Sleep(time.Second * 2)
-		cStream.Send(&pb.Number{Number: val})
+		bStream.Send(&pb.Number{Number: val})
+		time.Sleep(200 * time.Millisecond)
 	}
-	avgResp, _ := cStream.CloseAndRecv()
-	fmt.Println("Average: ", avgResp.Average)
+	bStream.CloseSend()
+	<-waitc
 }

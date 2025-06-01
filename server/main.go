@@ -73,6 +73,23 @@ func (s *server) Average(stream pb.CalculatorService_AverageServer) error {
 	}
 }
 
+func (s *server) Max(stream pb.CalculatorService_MaxServer) error {
+	var currentMax int32
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if in.Number > currentMax {
+			currentMax = in.Number
+			stream.Send(&pb.MaxResponse{CurrentMax: currentMax})
+		}
+	}
+}
+
 func main() {
 	lis, err := net.Listen("tcp", ":8000")
 	if err != nil {
