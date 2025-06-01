@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package grpc_calculator;
+option go_package = "grpc-calculator/calculatorpb";
+
+service CalculatorService {
+    rpc Add(AddRequest) returns (AddResponse) {}
+    rpc Subtract(SubtractRequest) returns (SubtractResponse) {}
+    rpc Mutliply(MultiplyRequest) returns (MultiplyResponse) {}
+    rpc Divide(DivideRequest) returns (DivideResponse) {}
+    rpc PrimeFactors (PrimeRequest) returns (stream PrimeResponse) {}
+    rpc Average (stream Number) returns (AverageResponse) {}
+    rpc Max (stream Number) returns (stream MaxResponse) {}
+}
+
+message AddRequest {
+    int32 a = 1;
+    int32 b = 2;
+}
+
+message AddResponse {
+    int32 result = 1;
+}
+
+message SubtractRequest {
+    int32 a = 1;
+    int32 b = 2;
+}
+
+message SubtractResponse {
+    int32 result = 1;
+}
+
+message MultiplyRequest {
+    int32 a = 1;
+    int32 b = 2;
+}
+
+message MultiplyResponse {
+    int32 result = 1;
+}
+
+message DivideRequest {
+    int32 a = 1;
+    int32 b = 2;
+}
+
+message DivideResponse {
+    int32 result = 1;
+}
+
+message PrimeRequest {
+    int32 number = 1;
+}
+
+message PrimeResponse {
+    int32 prime_factor = 1;
+}
+
+message Number {
+    int32 number = 1;
+}
+
+message AverageResponse {
+    double average = 1;
+}
+
+message MaxResponse {
+    int32 current_max = 1;
+}
+
